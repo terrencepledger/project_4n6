@@ -5,6 +5,8 @@ import 'package:project_4n6/Objects.dart';
 import 'package:random_string/random_string.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+import 'StudentRecordPage.dart';
+
 class TournamentRecordPage extends StatefulWidget {
 
   TournamentRecordPage(this.tourney) : super();
@@ -35,16 +37,22 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
             padding: const EdgeInsets.only(left: 18, bottom: 3.0, top: 3),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                eventRecords.elementAt(recordIndex).participantId
-                + " - " + 
-                eventRecords.elementAt(recordIndex).score.overallScore.toString(),
-                style: TextStyle(
-                  fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
-                  fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
-                  color: Colors.white
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: Theme.of(context).primaryColorDark),
+                onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
+                  StudentRecordPage(Student(eventRecords.elementAt(recordIndex).participantId, randomString(3), randomBetween(8, 12).toString())
+                )));},
+                child: Text(
+                  eventRecords.elementAt(recordIndex).participantId
+                  + " - " + 
+                  eventRecords.elementAt(recordIndex).score.overallScore.toString(),
+                  style: TextStyle(
+                    fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
+                    fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
+                    color: Colors.white
+                  ),
+                  textAlign: TextAlign.start,
                 ),
-                textAlign: TextAlign.start,
               ),
             ),
           );

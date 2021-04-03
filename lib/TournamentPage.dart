@@ -38,32 +38,35 @@ Widget TournamentPage(BuildContext context) {
         eventList.add(
           Align(
             alignment: Alignment.centerLeft,
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 8, bottom: 3),
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      eventKey.toString().split(".").last,
-                      style: Theme.of(context).textTheme.subtitle1,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 8, bottom: 3),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        eventKey.toString().split(".").last,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Column(
-                    children: List.generate(current.events[eventKey].length, (index) => Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "\u2022 " + current.events[eventKey].elementAt(index).participantId,
-                        textAlign: TextAlign.left,
-                        style: Theme.of(context).textTheme.subtitle2,
-                      ),
-                    )),
-                  )
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Column(
+                      children: List.generate(current.events[eventKey].length, (index) => Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "\u2022 " + current.events[eventKey].elementAt(index).participantId,
+                          textAlign: TextAlign.left,
+                          style: Theme.of(context).textTheme.subtitle2,
+                        ),
+                      )),
+                    )
+                  ),
+                ],
+              ),
             ),
           )
         );
@@ -73,13 +76,8 @@ Widget TournamentPage(BuildContext context) {
 
     }
 
-    // List.generate(8, (index) {
-    //   var current = Tournament(index.toString(), randomString(5), DateFormat('MM-dd').format(DateTime.now()));
-    //   tourneys.add(current);
-    // });
-
     return Container(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 8.0, right: 8.0),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         border: Border.all(),
       ),
@@ -88,13 +86,11 @@ Widget TournamentPage(BuildContext context) {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            // : Theme.of(context).primaryColor,
             onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => TournamentRecordPage(tourneys.elementAt(index))));},
             onPressed: () {  },
             child: ExpansionCard(
               margin: EdgeInsets.zero,
               borderRadius: 40,
-              
               title: Text(
                 current.title,
                 style: Theme.of(context).textTheme.headline4

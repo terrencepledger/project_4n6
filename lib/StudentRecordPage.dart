@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 // import 'package:random_string/random_string.dart';
 
 import 'Objects.dart';
+import 'TournamentRecordPage.dart';
 
 class StudentRecordPage extends StatefulWidget {
 
@@ -89,36 +90,42 @@ class _StudentRecordPage extends State<StudentRecordPage> {
             padding: EdgeInsets.only(top: 10),
             children: List.generate(student.tourneys.length, (index) { 
               var current = tourneys[student.tourneys.elementAt(index)];
-              return Card(
-                color: Theme.of(context).primaryColor,
-                elevation: 10,
-                child: ExpansionCard(
-                  margin: EdgeInsets.zero,
-                  borderRadius: 40,
-                  title: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          current.title,
-                          style: TextStyle(
-                            fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
-                            fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
-                            color: Colors.white
+              return Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+                child: ElevatedButton(
+                  // style: ElevatedButton.styleFrom(primary: Theme.of(context).primaryColor),
+                  onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
+                    TournamentRecordPage(tourneys[student.tourneys.elementAt(index)])
+                  ));},
+                  onPressed: () { },
+                  child: ExpansionCard(
+                    margin: EdgeInsets.zero,
+                    borderRadius: 40,
+                    title: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            current.title,
+                            style: TextStyle(
+                              fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
+                              fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
+                              color: Colors.white
+                            ),
                           ),
-                        ),
-                        Text(
-                          current.date,
-                          style: TextStyle(
-                            fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
-                            fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
-                            color: Colors.white
+                          Text(
+                            current.date,
+                            style: TextStyle(
+                              fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
+                              fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
+                              color: Colors.white
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    children: getStudentRecordsListFromTourney(current) + [Padding(padding: EdgeInsets.only(bottom: 15))]
                   ),
-                  children: getStudentRecordsListFromTourney(current) + [Padding(padding: EdgeInsets.only(bottom: 15))]
                 ),
               );
             }),
