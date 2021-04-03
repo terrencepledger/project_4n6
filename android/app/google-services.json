@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "120760021262",
+    "project_id": "sumner-4n6",
+    "storage_bucket": "sumner-4n6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120760021262:android:ad62dca5d035ff0fd7275f",
+        "android_client_info": {
+          "package_name": "com.sumner4n6.seasontracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120760021262-ab8ri64eci9qsti8001s145af1c5tt78.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLaZrHGsPMH5aoVdcAY_BwNyWqJVhq95I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120760021262-ab8ri64eci9qsti8001s145af1c5tt78.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

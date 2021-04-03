@@ -27,6 +27,8 @@ dependencies:
   expansion_card: ^0.1.0  
   fl_chart: ^0.20.1
   intl: ^0.15.7
+  firebase_core: ^0.7.0
+  cloud_firestore: ^0.16.0
 
 
 

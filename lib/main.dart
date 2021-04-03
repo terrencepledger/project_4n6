@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:project_4n6/StudentPage.dart';
-
 import 'HomePage.dart';
 import 'TournamentPage.dart';
 
@@ -60,7 +59,7 @@ class _AppPageState extends State<AppPage> {
             title: Text('Home'),
             onTap: () {
               setState(() {
-                pageBody = HomePage(context);
+                pageBody = HomePage();
                 pageTitle = Text('Home');
                 Navigator.pop(context);
               });
@@ -96,7 +95,7 @@ class _AppPageState extends State<AppPage> {
     if(pageBody == null)
     {
       setState(() {
-        pageBody = HomePage(context);
+        pageBody = HomePage();
       });
     }
     return Scaffold(

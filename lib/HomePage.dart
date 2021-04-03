@@ -1,11 +1,32 @@
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'Objects.dart';
 
+class HomePage extends StatefulWidget {
+  const HomePage({ Key key }) : super(key: key);
 
-Widget HomePage(BuildContext context) {
+  @override
+  _HomePage createState() => _HomePage();
+}
+
+class _HomePage extends State<HomePage> {
+
+  var _student = "";
   
+  _HomePage() {
+    Firebase.initializeApp().then((value) {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference studentsCollection = firestore.collection('students');
+      studentsCollection.doc("0").get().then((value) => {
+        setState(() {
+          _student = value.data()["name"];
+        })
+      });
+    });
+  }
+
   String _nextTournament = "N/A";
   
   double _score = 1;
@@ -41,37 +62,46 @@ Widget HomePage(BuildContext context) {
 
   }
 
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: Text(
-            "Sumner Overall Score: $_score",
-            style: Theme.of(context).textTheme.headline5
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Sumner Overall Score: $_score",
+              style: Theme.of(context).textTheme.headline5
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: Text(
-            "Upcoming Tournament: $_nextTournament",
-            style: Theme.of(context).textTheme.headline5
+          Padding(
+            padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Upcoming Tournament: $_nextTournament",
+              style: Theme.of(context).textTheme.headline5
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: Text(
-            "Recent Tournaments",
-            style: Theme.of(context).textTheme.headline5
+          Padding(
+            padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Recent Tournaments",
+              style: Theme.of(context).textTheme.headline5
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: getRecentList(),
-        ),
-      ],
-    ),
-  );
-
+          Padding(
+            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Student: $_student",
+              style: Theme.of(context).textTheme.headline5,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: getRecentList(),
+          ),
+        ],
+      ),
+    );
+  }
 }
