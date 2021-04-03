@@ -13,7 +13,12 @@ class Student {
 
   List<String> tourneys = [];
 
-  Student(this.id, this.name, this.grade);
+  Student.two(this.id, this.name, this.grade);
+
+  Student(this.id, Map<String, dynamic> fbObject) {
+    name = fbObject[name];
+    grade = fbObject[grade];
+  }
 
 }
 
@@ -29,7 +34,24 @@ class Tournament {
 
   dynamic events = {};
 
-  Tournament(this.id, this.title, this.date);
+  Tournament.two(this.id, this.title, this.date);
+
+  Tournament(this.id, Map<String, dynamic> fbObject) {
+    title = fbObject[title];
+    date = fbObject[date];
+    for (var eventKey in fbObject[events].keys) {
+      for (var record in fbObject[events][eventKey]) {
+        if(events[eventKey] == null)
+        {
+          events[eventKey] = [Record(record)];
+        }
+        else
+        {
+          events[eventKey].add(Record(record));
+        }
+      }
+    }
+  }
 
   void addRecord(Record toAdd) {
 
@@ -55,7 +77,13 @@ class Record {
   String participantId;
   event title;
 
-  Record(this.title, this.participantId, this.score);
+  Record.create(this.title, this.participantId, this.score);
+
+  Record(Map<String, dynamic> fbObject) {
+    score = Score(fbObject[score]);
+    participantId = fbObject[participantId];
+    title = fbObject[title];
+  }
 
 }
 
