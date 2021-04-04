@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:expansion_card/expansion_card.dart';
@@ -23,11 +25,33 @@ class StudentRecordPage extends StatefulWidget {
 class _StudentRecordPage extends State<StudentRecordPage> {
   
   Student student;
-  dynamic tourneys = {};
+  // Map<String, Tournament> tourneys = {};
+  List<Tournament> tourneys = [];
   List<Record> studentRecords = [];
 
-
   _StudentRecordPage(this.student);
+
+  @override
+  void initState() { 
+    super.initState();
+    loadTourneys();
+  }
+
+  void loadTourneys() {
+    student.onReady(
+      () {
+        CollectionReference tourneyCollection = FirebaseFirestore.instance.collection("tourneys");        
+        print(student.tourneyIds);
+        for (String tourneyId in student.tourneyIds) {
+          tourneyCollection.doc(tourneyId).get().then((fbTourney) {
+            setState(() {
+            tourneys.add(Tournament(fbTourney.id, fbTourney.data()));                  
+            });
+          });
+        }
+      }
+    );
+  }
 
   Widget getRecordsList() {
       
@@ -38,7 +62,9 @@ class _StudentRecordPage extends State<StudentRecordPage> {
           for (var record in currentRecords) {
             if(record.participantId == student.id)
             {
-              studentRecords.add(record);
+              setState(() {
+                studentRecords.add(record);       
+              });
             }
           }
         }
@@ -65,21 +91,7 @@ class _StudentRecordPage extends State<StudentRecordPage> {
           );
         });
 
-      } 
-
-      for (var index = 0; index < randomBetween(3, 6); index++) {
-        
-        String title = randomString(randomBetween(5, 10));
-        Tournament tourney = Tournament(index.toString(), "Tourney: $title", DateTime.now().toString());
-        tourney.addRecord(Record(event.values.elementAt(randomBetween(0, 2)), student.id, Score([int.parse(randomNumeric(1)), int.parse(randomNumeric(1)), index])));
-        tourney.addRecord(Record(event.values.elementAt(randomBetween(0, 2)), student.id, Score([int.parse(randomNumeric(1)), int.parse(randomNumeric(1)), index])));
-        tourney.addRecord(Record(event.values.elementAt(randomBetween(0, 2)), student.id, Score([int.parse(randomNumeric(1)), int.parse(randomNumeric(1)), index])));
-        tourneys[tourney.id] = tourney;
-        setState(() {
-          student.tourneys.add(tourney.id);     
-        });
-
-      }        
+      }     
 
       return Container(
           padding: const EdgeInsets.only(top: 0.0, bottom: 8.0, left: 20.0, right: 20.0),
@@ -88,14 +100,14 @@ class _StudentRecordPage extends State<StudentRecordPage> {
           ),
           child: ListView(
             padding: EdgeInsets.only(top: 10),
-            children: List.generate(student.tourneys.length, (index) { 
-              var current = tourneys[student.tourneys.elementAt(index)];
+            children: List.generate(tourneys.length, (index) { 
+              var current = tourneys.elementAt(index);
               return Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 8),
                 child: ElevatedButton(
                   // style: ElevatedButton.styleFrom(primary: Theme.of(context).primaryColor),
                   onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
-                    TournamentRecordPage(tourneys[student.tourneys.elementAt(index)])
+                    TournamentRecordPage(tourneys.elementAt(index))
                   ));},
                   onPressed: () { },
                   child: ExpansionCard(
@@ -114,7 +126,7 @@ class _StudentRecordPage extends State<StudentRecordPage> {
                             ),
                           ),
                           Text(
-                            current.date,
+                            current.getPrettyDate(),
                             style: TextStyle(
                               fontFamily: Theme.of(context).textTheme.subtitle2.fontFamily,
                               fontSize: Theme.of(context).textTheme.subtitle2.fontSize,
@@ -207,7 +219,7 @@ class _StudentRecordPage extends State<StudentRecordPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              initialValue: student.grade,
+                              initialValue: student.grade.toString(),
                               decoration: InputDecoration(
                                 labelText: "Grade"
                               ),

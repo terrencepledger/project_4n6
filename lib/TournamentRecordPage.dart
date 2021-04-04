@@ -40,8 +40,8 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(primary: Theme.of(context).primaryColorDark),
                 onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
-                  StudentRecordPage(Student(eventRecords.elementAt(recordIndex).participantId, randomString(3), randomBetween(8, 12).toString())
-                )));},
+                  StudentRecordPage(Student.load(eventRecords.elementAt(recordIndex).participantId))
+                ));},
                 child: Text(
                   eventRecords.elementAt(recordIndex).participantId
                   + " - " + 
@@ -128,7 +128,7 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              initialValue: tourney.date,
+                              initialValue: tourney.getPrettyDate(),
                               decoration: InputDecoration(
                                 labelText: "Date"
                               ),

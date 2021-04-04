@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:project_4n6/TournamentRecordPage.dart';
 import 'Objects.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,43 +13,44 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
-
-  var _student = "";
   
-  _HomePage() {
+  Tournament _nextTournament;
+  String _nextTournamentName = "N/A";
+  String _nextTournamentDate = "N/A";
+  
+  double _score = 1;
+
+  List<Tournament> tournaments = [];
+  
+  @override
+  void initState() { 
+    super.initState();
     Firebase.initializeApp().then((value) {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference studentsCollection = firestore.collection('students');
-      studentsCollection.doc("0").get().then((value) => {
+      loadTourneys();
+    });
+  }
+
+  void loadTourneys() {
+    var tempScores = [];
+    CollectionReference tourneyCollection = FirebaseFirestore.instance.collection("tourneys");
+    tourneyCollection.get().then((fbTourneys) {
+      fbTourneys.docs.forEach((fbTourney) { 
+        Tournament current = Tournament(fbTourney.id, fbTourney.data());
+        tempScores.addAll(current.scores);
         setState(() {
-          _student = value.data()["name"];
-        })
+          tournaments.add(current);
+          _nextTournament = current; 
+          _nextTournamentDate = current.getPrettyDate();
+          _nextTournamentName = current.title;        
+        });
+      });
+      setState(() {
+        _score = (tempScores.reduce((a,b) => a + b) / tempScores.length);              
       });
     });
   }
 
-  String _nextTournament = "N/A";
-  
-  double _score = 1;
-
-  List<Tournament> tournaments = [Tournament(1.toString(), "Tournament 1", DateTime.now().toString())];
-
   Widget getRecentList() {
-
-    Student me = Student(1.toString(), "Terrence", "12th");
-
-    double temp = 0;
-    tournaments.forEach((element) {
-      element.addRecord(
-        Record(event.Extemp, me.id, Score([3,5,2, tournaments.indexOf(element)]))
-      );
-      temp += element.overallScore;
-    });
-    temp = temp/tournaments.length;
-    _score = temp;
-    // setState(() {
-    //     _score = temp;         
-    // });
 
     return Container(
       padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
@@ -56,7 +58,22 @@ class _HomePage extends State<HomePage> {
         border: Border.all(),
       ),
       child: SingleChildScrollView(child: Table(
-        children: List.generate(tournaments.length, (index) => TableRow(children: [Center(child: Text(tournaments.elementAt(index).title)), Center(child: Text(tournaments.elementAt(index).overallScore.toString()))]),
+        children: List.generate(tournaments.length, (index) => TableRow(children: [
+          ElevatedButton(
+            onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
+              TournamentRecordPage(_nextTournament)
+            ));},
+            child: Center(
+              child: Row(
+                children: [
+                  Center(child: Text(tournaments.elementAt(index).title)), 
+                  Center(child: Text(tournaments.elementAt(index).overallScore.toString())),
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              ),
+            ),
+          )
+        ]),
       )),
     ));
 
@@ -68,18 +85,32 @@ class _HomePage extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: Text(
-              "Sumner Overall Score: $_score",
-              style: Theme.of(context).textTheme.headline5
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
+              child: Text(
+                "Sumner Overall Score: \n$_score",
+                style: Theme.of(context).textTheme.headline5
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: Text(
-              "Upcoming Tournament: $_nextTournament",
-              style: Theme.of(context).textTheme.headline5
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    "Upcoming Tournament: \n",
+                    style: Theme.of(context).textTheme.headline5
+                  ),
+                  ElevatedButton(
+                    onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
+                      TournamentRecordPage(_nextTournament)
+                    ));},
+                    child: Text("$_nextTournamentName on $_nextTournamentDate"),
+                  )
+                ],
+              ),
             ),
           ),
           Padding(
@@ -87,13 +118,6 @@ class _HomePage extends State<HomePage> {
             child: Text(
               "Recent Tournaments",
               style: Theme.of(context).textTheme.headline5
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: Text(
-              "Student: $_student",
-              style: Theme.of(context).textTheme.headline5,
             ),
           ),
           Padding(

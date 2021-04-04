@@ -1,21 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project_4n6/StudentRecordPage.dart';
 import 'package:random_string/random_string.dart';
 
-
 import 'Objects.dart';
 
-Widget StudentPage(BuildContext context) {
+class StudentPage extends StatefulWidget {
+  StudentPage({Key key}) : super(key: key);
 
+  @override
+  _StudentPageState createState() => _StudentPageState();
+}
+
+class _StudentPageState extends State<StudentPage> {
+  
   List<Student> students = [];
 
-  Widget getStudentList() {
+  @override
+  void initState() { 
+    super.initState();
+    loadStudents();
+  }
 
-    List.generate(50, (index) {
-      int grade = randomBetween(8, 12);
-      students.add(Student(index.toString(), randomString(randomBetween(4, 7)), "Grade: $grade"));
+  void loadStudents() {
+
+    FirebaseFirestore.instance.collection("students").get()
+    .then((studentCollection) {
+      studentCollection.docs.forEach((student) {
+        setState(() {
+          students.add(Student(student.id, student.data()));
+        });
+      });
     });
+
+  }
+
+  Widget getStudentList() {
 
     return Container(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 8.0, right: 8.0),
@@ -41,7 +62,7 @@ Widget StudentPage(BuildContext context) {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               SizedBox(width: 145, child: Text(students.elementAt(index).name, maxLines: 1, overflow: TextOverflow.ellipsis,)), 
-                              Text(students.elementAt(index).grade, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                              Text(students.elementAt(index).grade.toString(), maxLines: 1, overflow: TextOverflow.ellipsis,),
                             ],
                           ),
                         ),
@@ -58,28 +79,30 @@ Widget StudentPage(BuildContext context) {
         }
       ))],
     ));
-
+  
   }
-
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 15.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: Text(
-            "Students",
-            style: Theme.of(context).textTheme.headline3
+  
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 15.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Students",
+              style: Theme.of(context).textTheme.headline3
+            ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: getStudentList(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
+              child: getStudentList(),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-
+        ],
+      ),
+    );
+  }
 }

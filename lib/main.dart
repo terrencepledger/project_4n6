@@ -9,7 +9,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
       home: AppPage(title: 'Home Page'),
     );
   }
+  
 }
 
 class AppPage extends StatefulWidget {
@@ -69,7 +70,7 @@ class _AppPageState extends State<AppPage> {
             title: Text('Students'),
             onTap: () {
               setState(() {
-                pageBody = StudentPage(context);
+                pageBody = StudentPage();
                 pageTitle = Text('Students');
                 Navigator.pop(context);
               });
@@ -79,7 +80,7 @@ class _AppPageState extends State<AppPage> {
             title: Text('Tournaments'),
             onTap: () {
               setState(() {
-                pageBody = TournamentPage(context);
+                pageBody = TournamentPage();
                 pageTitle = Text('Tournaments');
                 Navigator.pop(context);
               });
@@ -106,4 +107,5 @@ class _AppPageState extends State<AppPage> {
       body: pageBody
     );
   }
+
 }

@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 enum event {
   Poetry,
   Prose,
@@ -9,46 +12,75 @@ class Student {
 
   String id;
   String name;
-  String grade;
+  int grade;
+  bool isReady = false;
 
-  List<String> tourneys = [];
+  List<String> tourneyIds = [];
 
-  Student.two(this.id, this.name, this.grade);
+  Function callBack;
 
   Student(this.id, Map<String, dynamic> fbObject) {
-    name = fbObject[name];
-    grade = fbObject[grade];
+    name = fbObject["name"];
+    grade = fbObject["grade"];
+    for (var id in fbObject['tourneyIds']) {
+      tourneyIds.add(id as String);
+    }
+    isReady = true;
   }
+
+  Student.load(this.id) {
+    refresh();
+  }
+
+  void refresh() {
+    FirebaseFirestore.instance.collection("students").doc(id).get().then((value) => {
+      name = value["name"],
+      grade = value["grade"],
+      for (var id in value['tourneyIds']) {
+        tourneyIds.add(id as String)
+      },
+      print("In student: $tourneyIds"),
+      ready()
+    });
+  }
+
+  void onReady(Function func) {
+    if(!isReady)
+      callBack = func;
+    else
+      func.call();
+  }
+
+  void ready() => callBack.call();
 
 }
 
 class Tournament {
 
-  double overallScore = 1;
+  double overallScore = 0;
   int recordsLength = 0;
   List<String> participantIds = [];
+  List<dynamic> scores = [];
 
   String id;
   String title;
-  String date;
+  DateTime date;
 
   dynamic events = {};
 
   Tournament.two(this.id, this.title, this.date);
 
   Tournament(this.id, Map<String, dynamic> fbObject) {
-    title = fbObject[title];
-    date = fbObject[date];
-    for (var eventKey in fbObject[events].keys) {
-      for (var record in fbObject[events][eventKey]) {
-        if(events[eventKey] == null)
-        {
-          events[eventKey] = [Record(record)];
-        }
-        else
-        {
-          events[eventKey].add(Record(record));
-        }
+    title = fbObject["title"];
+    date = (fbObject["date"] as Timestamp).toDate();
+    for (String eventKeyString in fbObject["events"].keys) {
+      for (var record in fbObject["events"][eventKeyString]) {
+        addRecord(
+          Record(record, 
+            event.values.firstWhere((e) => e.toString().split('.').last.toLowerCase() == eventKeyString.toLowerCase()), 
+            id
+          )
+        );
       }
     }
   }
@@ -64,8 +96,15 @@ class Tournament {
       events[toAdd.title].add(toAdd);
     }
 
-    recordsLength++;
-    overallScore = (overallScore + toAdd.score.overallScore) / recordsLength;
+    toAdd.score.scores.forEach((element) {scores.add(element);});
+    overallScore = (scores.reduce((a,b) => a + b) / scores.length);
+    print(overallScore);
+
+  }
+
+  String getPrettyDate() {
+
+    return DateFormat('MM-dd-yyyy').format(date);
 
   }
 
@@ -75,14 +114,14 @@ class Record {
 
   Score score;
   String participantId;
+  String tourneyId;
   event title;
 
-  Record.create(this.title, this.participantId, this.score);
+  Record.create(this.title, this.participantId, this.tourneyId, this.score);
 
-  Record(Map<String, dynamic> fbObject) {
-    score = Score(fbObject[score]);
-    participantId = fbObject[participantId];
-    title = fbObject[title];
+  Record(Map<String, dynamic> fbObject, this.title, this.tourneyId) {
+    score = Score(fbObject["score"]);
+    participantId = fbObject["participantId"];
   }
 
 }
@@ -90,17 +129,17 @@ class Record {
 class Score {
 
   double overallScore = 1;
-  List<int> scores = [];
+  List<dynamic> scores = [];
 
-  Score(List<int> someScores) {
+  Score(List<dynamic> someScores) {
     addScores(someScores);
   }
 
-  void addScores(List<int> toAdd) {
-    print(toAdd);
-    toAdd.forEach((element) {scores.add(element);});
+  int getSum() => scores.reduce((a,b) => a + b);
+
+  void addScores(List<dynamic> toAdd) {
+    toAdd.forEach((element) {scores.add(element as int);});
     overallScore = (scores.reduce((a,b) => a + b) / scores.length);
-    print(scores);
   }
 
 }

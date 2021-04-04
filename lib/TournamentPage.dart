@@ -1,32 +1,42 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:random_string/random_string.dart';
 import 'package:intl/intl.dart';
 import 'package:expansion_card/expansion_card.dart';
-
-
-import 'Objects.dart';
 import 'TournamentRecordPage.dart';
+import 'Objects.dart';
 
-Widget TournamentPage(BuildContext context) {
+class TournamentPage extends StatefulWidget {
+  TournamentPage({Key key}) : super(key: key);
 
-  Tournament x = Tournament("0", "Title", DateTime.now().toString());
-  x.addRecord(Record(event.Extemp, "abc123", Score([1, 1, 2])));
-  x.addRecord(Record(event.Extemp, "abc124", Score([1, 1, 2])));
-  x.addRecord(Record(event.Impromptu, "abc125", Score([1, 1, 2])));  
-  x.addRecord(Record(event.Impromptu, "abc128", Score([1, 3, 2])));
-  x.addRecord(Record(event.Extemp, "abc126", Score([1, 1, 2])));
-  x.addRecord(Record(event.Prose, "abc127", Score([1, 1, 2])));
+  @override
+  _TournamentPageState createState() => _TournamentPageState();
 
-  Tournament y = Tournament("1", "Title2", DateTime.now().toString());
-  y.addRecord(Record(event.Extemp, "abc123", Score([1, 1, 2])));
-  y.addRecord(Record(event.Extemp, "abc124", Score([1, 1, 2])));
-  y.addRecord(Record(event.Impromptu, "abc125", Score([1, 1, 2])));  
-  y.addRecord(Record(event.Impromptu, "abc128", Score([1, 3, 2])));
-  y.addRecord(Record(event.Extemp, "abc126", Score([1, 1, 2])));
-  y.addRecord(Record(event.Prose, "abc127", Score([1, 1, 2])));
+}
 
-  List<Tournament> tourneys = [x,y];
+class _TournamentPageState extends State<TournamentPage> {
+
+  List<Tournament> tourneys = [];
+
+  @override
+  void initState() { 
+    super.initState();
+    loadTournaments();
+  }
+
+  void loadTournaments() {
+
+    FirebaseFirestore.instance.collection("tourneys").get()
+    .then((studentCollection) {
+      studentCollection.docs.forEach((tourney) {
+        setState(() {
+          tourneys.add(Tournament(tourney.id, tourney.data()));
+        });
+      });
+    });
+
+  }
 
   Widget getTourneyList() {
 
@@ -99,31 +109,33 @@ Widget TournamentPage(BuildContext context) {
             ),
           ),
         );
-      }
-      )),
+      })),
     );
-
+  
   }
 
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 15.0, bottom: 8.0, left: 8.0, right: 8.0),
-          child: Text(
-            "Tournaments",
-            style: Theme.of(context).textTheme.headline3
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 15.0, bottom: 8.0, left: 8.0, right: 8.0),
+            child: Text(
+              "Tournaments",
+              style: Theme.of(context).textTheme.headline3
+            ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: getTourneyList(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
+              child: getTourneyList(),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
 }
