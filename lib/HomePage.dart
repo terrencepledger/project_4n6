@@ -61,7 +61,7 @@ class _HomePage extends State<HomePage> {
         children: List.generate(tournaments.length, (index) => TableRow(children: [
           ElevatedButton(
             onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
-              TournamentRecordPage(_nextTournament)
+              TournamentRecordPage(tournaments.elementAt(index))
             ));},
             child: Center(
               child: Row(
