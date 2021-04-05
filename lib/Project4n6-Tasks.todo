@@ -1,0 +1,6 @@
+TournamentRecordPage:
+    ☐ Remove student from event on long press
+        ☐ Check if student is in other events in tourney,
+        if not, remove tourney from student fbObject as well
+HomePage:
+    ☐ Fix link when clicking tourneys in recent list
