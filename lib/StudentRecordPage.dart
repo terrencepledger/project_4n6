@@ -28,6 +28,8 @@ class _StudentRecordPage extends State<StudentRecordPage> {
   // Map<String, Tournament> tourneys = {};
   List<Tournament> tourneys = [];
   List<Record> studentRecords = [];
+  String initialName = "";
+  String initialGrade = "";
 
   _StudentRecordPage(this.student);
 
@@ -40,12 +42,16 @@ class _StudentRecordPage extends State<StudentRecordPage> {
   void loadTourneys() {
     student.onReady(
       () {
+        setState(() {
+          initialName = student.name;
+          initialGrade = student.grade.toString();        
+        });
         CollectionReference tourneyCollection = FirebaseFirestore.instance.collection("tourneys");        
         print(student.tourneyIds);
         for (String tourneyId in student.tourneyIds) {
           tourneyCollection.doc(tourneyId).get().then((fbTourney) {
             setState(() {
-            tourneys.add(Tournament(fbTourney.id, fbTourney.data()));                  
+              tourneys.add(Tournament(fbTourney.id, fbTourney.data()));                  
             });
           });
         }
@@ -207,7 +213,8 @@ class _StudentRecordPage extends State<StudentRecordPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              initialValue: student.name,
+                              key: Key(initialName),
+                              initialValue: initialName,
                               decoration: InputDecoration(
                                 labelText: "Name"
                               ),
@@ -219,7 +226,8 @@ class _StudentRecordPage extends State<StudentRecordPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              initialValue: student.grade.toString(),
+                              key: Key(initialGrade),
+                              initialValue: initialGrade,
                               decoration: InputDecoration(
                                 labelText: "Grade"
                               ),
