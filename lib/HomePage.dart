@@ -21,10 +21,10 @@ class _HomePage extends State<HomePage> {
   double _score = 1;
 
   List<Tournament> tournaments = [];
-  
+
   @override
-  void initState() { 
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     Firebase.initializeApp().then((value) {
       loadTourneys();
     });
@@ -32,6 +32,7 @@ class _HomePage extends State<HomePage> {
 
   void loadTourneys() {
     var tempScores = [];
+    tournaments = [];
     CollectionReference tourneyCollection = FirebaseFirestore.instance.collection("tourneys");
     tourneyCollection.get().then((fbTourneys) {
       fbTourneys.docs.forEach((fbTourney) { 
@@ -45,7 +46,8 @@ class _HomePage extends State<HomePage> {
         });
       });
       setState(() {
-        _score = (tempScores.reduce((a,b) => a + b) / tempScores.length);              
+        if(tempScores.length > 0)
+          _score = double.parse((tempScores.reduce((a,b) => a + b) / tempScores.length).toStringAsFixed(2));              
       });
     });
   }
@@ -62,7 +64,7 @@ class _HomePage extends State<HomePage> {
           ElevatedButton(
             onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
               TournamentRecordPage(tournaments.elementAt(index))
-            ));},
+            )).then((value) => loadTourneys());},
             child: Center(
               child: Row(
                 children: [
@@ -90,27 +92,29 @@ class _HomePage extends State<HomePage> {
               padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
               child: Text(
                 "Sumner Overall Score: \n$_score",
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headline5
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: Center(
-              child: Column(
-                children: [
-                  Text(
-                    "Upcoming Tournament: \n",
-                    style: Theme.of(context).textTheme.headline5
-                  ),
-                  ElevatedButton(
+            child: Column(
+              children: [
+                Text(
+                  "Upcoming Tournament:",
+                  style: Theme.of(context).textTheme.headline5
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
                     onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
                       TournamentRecordPage(_nextTournament)
-                    ));},
+                    )).then((value) => loadTourneys());},
                     child: Text("$_nextTournamentName on $_nextTournamentDate"),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
           ),
           Padding(

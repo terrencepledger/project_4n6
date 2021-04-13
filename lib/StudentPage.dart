@@ -26,6 +26,7 @@ class _StudentPageState extends State<StudentPage> {
   }
 
   void loadStudents() {
+    
     students = [];
     FirebaseFirestore.instance.collection("students").get()
     .then((studentCollection) {

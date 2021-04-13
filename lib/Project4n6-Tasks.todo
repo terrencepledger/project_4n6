@@ -1,6 +1,21 @@
+TournamentPage:
+
 TournamentRecordPage:
-    ☐ Remove student from event on long press
-        ☐ Check if student is in other events in tourney,
-        if not, remove tourney from student fbObject as well
+    ✔ Change event text from id to name @done (4/5/2021, 3:51:02 PM)
+         ✔ Must use participantid from event to load students in from db  @done (4/5/2021, 3:51:36 PM)
+    ✔ Remove record from event on long press @done (4/7/2021, 3:38:49 PM)
+        ✔ Check if student is in other events in tourney, if not, remove tourney from student fbObject as well @today @done (4/6/2021, 8:43:09 AM)
+    ✔ Implement adding records @done (4/7/2021, 3:02:06 PM)
+    ✔ Add all available events to records @done (4/7/2021, 3:02:08 PM)
+        ✔ Implement empty events for the purpose of adding students @done (4/7/2021, 3:02:13 PM)
+    ☐ Implement graph comparing students by events
 HomePage:
-    ☐ Fix link when clicking tourneys in recent list
+    ✔ Fix link when clicking tourneys in recent list @done (4/5/2021, 3:53:23 PM)
+    ☐ Correct recent list to only include last 3 tournaments
+    ☐ Correct upcoming tournament to retrieve actually retrieve the upcoming tournament
+Score (Object):
+    ☐ Round score to two decimals @today 
+Settings:
+    ☐ Create page
+    ☐ List of events
+    ☐ Show overall score on home page

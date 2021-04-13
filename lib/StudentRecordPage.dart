@@ -40,6 +40,7 @@ class _StudentRecordPage extends State<StudentRecordPage> {
   }
 
   void loadTourneys() {
+    tourneys = [];
     student.onReady(
       () {
         setState(() {
@@ -47,7 +48,7 @@ class _StudentRecordPage extends State<StudentRecordPage> {
           initialGrade = student.grade.toString();        
         });
         CollectionReference tourneyCollection = FirebaseFirestore.instance.collection("tourneys");        
-        print(student.tourneyIds);
+        tourneys = [];
         for (String tourneyId in student.tourneyIds) {
           tourneyCollection.doc(tourneyId).get().then((fbTourney) {
             setState(() {

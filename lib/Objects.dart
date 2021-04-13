@@ -32,15 +32,16 @@ class Student {
     refresh();
   }
 
-  void refresh() {
-    FirebaseFirestore.instance.collection("students").doc(id).get().then((value) => {
+  Future<void> refresh() async {
+    return FirebaseFirestore.instance.collection("students").doc(id).get().then((value) => {
       name = value["name"],
       grade = value["grade"],
       for (var id in value['tourneyIds']) {
-        tourneyIds.add(id as String)
+        if(id!="")
+          tourneyIds.add(id as String)
       },
-      print("In student: $tourneyIds"),
-      ready()
+      if(!isReady)
+        ready()
     });
   }
 
@@ -51,7 +52,11 @@ class Student {
       func.call();
   }
 
-  void ready() => callBack.call();
+  void ready() => {
+    isReady = true,
+    if(callBack != null)
+      callBack.call()
+  };
 
 }
 
@@ -73,16 +78,17 @@ class Tournament {
   Tournament(this.id, Map<String, dynamic> fbObject) {
     title = fbObject["title"];
     date = (fbObject["date"] as Timestamp).toDate();
-    for (String eventKeyString in fbObject["events"].keys) {
-      for (var record in fbObject["events"][eventKeyString]) {
-        addRecord(
-          Record(record, 
-            event.values.firstWhere((e) => e.toString().split('.').last.toLowerCase() == eventKeyString.toLowerCase()), 
-            id
-          )
-        );
+    if(fbObject["events"] != null)
+      for (String eventKeyString in fbObject["events"].keys) {
+        for (var record in fbObject["events"][eventKeyString]) {
+          addRecord(
+            Record(record, 
+              event.values.firstWhere((e) => e.toString().split('.').last.toLowerCase() == eventKeyString.toLowerCase()), 
+              id
+            )
+          );
+        }
       }
-    }
   }
 
   void addRecord(Record toAdd) {
@@ -97,8 +103,8 @@ class Tournament {
     }
 
     toAdd.score.scores.forEach((element) {scores.add(element);});
-    overallScore = (scores.reduce((a,b) => a + b) / scores.length);
-    print(overallScore);
+    if(scores.length != 0)
+      overallScore = double.parse((scores.reduce((a,b) => a + b) / scores.length).toStringAsFixed(2));
 
   }
 
@@ -139,7 +145,8 @@ class Score {
 
   void addScores(List<dynamic> toAdd) {
     toAdd.forEach((element) {scores.add(element as int);});
-    overallScore = (scores.reduce((a,b) => a + b) / scores.length);
+    if(scores.length != 0)
+      overallScore = double.parse(((scores.reduce((a,b) => a + b) / scores.length)).toStringAsFixed(2));
   }
 
 }
