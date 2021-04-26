@@ -48,49 +48,52 @@ class _TournamentPageState extends State<TournamentPage> {
 
   Widget getTourneyList() {
 
-    return Container(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 8.0, right: 8.0),
-      decoration: BoxDecoration(
-        border: Border.all(),
-      ),
-      child: ListView(children: [Table(
-        children: List.generate(tourneyList.length, (index) {
-          return TableRow(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: Card(
-                  elevation: 10,
-                  child: ElevatedButton(
-                    onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
-                      TournamentRecordPage(tourneyList.elementAt(index))));
-                    },
-                    onPressed: () { },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SizedBox(width: 145, child: Text(tourneyList.elementAt(index).title, maxLines: 1, overflow: TextOverflow.ellipsis,)), 
-                              Text(tourneyList.elementAt(index).getPrettyDate(), maxLines: 1, overflow: TextOverflow.ellipsis,),
-                            ],
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 8.0, right: 8.0),
+        decoration: BoxDecoration(
+          border: Border.all(),
+        ),
+        child: ListView(children: [Table(
+          children: List.generate(tourneyList.length, (index) {
+            return TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Card(
+                    elevation: 10,
+                    child: ElevatedButton(
+                      onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => 
+                        TournamentRecordPage(tourneyList.elementAt(index)))).then((value) => loadTournaments());
+                      },
+                      onPressed: () { },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SizedBox(width: 145, child: Text(tourneyList.elementAt(index).title, maxLines: 1, overflow: TextOverflow.ellipsis,)), 
+                                Text(tourneyList.elementAt(index).getPrettyDate(), maxLines: 1, overflow: TextOverflow.ellipsis,),
+                              ],
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () { confirmDialog(tourneyList.elementAt(index)); },
-                          icon: Icon(Icons.remove_circle_outline_sharp)
-                        ),
-                      ],
-                    ),
-                  ),),
-              )
-            ]
-          );
-        }
-      ))],
-    ));
+                          IconButton(
+                            onPressed: () { confirmDialog(tourneyList.elementAt(index)); },
+                            icon: Icon(Icons.remove_circle_outline_sharp)
+                          ),
+                        ],
+                      ),
+                    ),),
+                )
+              ]
+            );
+          }
+        ))],
+        shrinkWrap: true,
+      )),
+    );
 
   }
 

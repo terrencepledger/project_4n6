@@ -91,14 +91,14 @@ class _HomePage extends State<HomePage> {
             child: Padding(
               padding: const EdgeInsets.only(top: 50.0, bottom: 8.0, left: 8.0, right: 8.0),
               child: Text(
-                "Sumner Overall Score: \n$_score",
+                "Sumner Overall Score: $_score",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headline5
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
+            padding: const EdgeInsets.only(top: 30.0, bottom: 8.0, left: 8.0, right: 8.0),
             child: Column(
               children: [
                 Text(
@@ -119,14 +119,21 @@ class _HomePage extends State<HomePage> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 20.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: Text(
-              "Recent Tournaments",
-              style: Theme.of(context).textTheme.headline5
+            child: Row(
+              children: [
+                Text(
+                  "Recent Tournaments",
+                  textAlign: TextAlign.left,
+                  style: Theme.of(context).textTheme.headline6
+                ),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 8.0, left: 8.0, right: 8.0),
-            child: getRecentList(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2.0, bottom: 8.0, left: 8.0, right: 8.0),
+              child: getRecentList(),
+            ),
           ),
         ],
       ),

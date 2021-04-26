@@ -71,20 +71,20 @@ class Tournament {
   String title;
   DateTime date;
 
-  dynamic events = {};
+  Map<event, List<Record>> events = {};
 
-  Tournament.two(this.id, this.title, this.date);
+  Tournament.create(this.id, this.title, this.date, this.events);
 
   Tournament(this.id, Map<String, dynamic> fbObject) {
     title = fbObject["title"];
     date = (fbObject["date"] as Timestamp).toDate();
     if(fbObject["events"] != null)
       for (String eventKeyString in fbObject["events"].keys) {
-        for (var record in fbObject["events"][eventKeyString]) {
+        for (int i = 0; i < fbObject["events"][eventKeyString].length; i++) {
           addRecord(
-            Record(record, 
+            Record(i, fbObject["events"][eventKeyString][i], 
               event.values.firstWhere((e) => e.toString().split('.').last.toLowerCase() == eventKeyString.toLowerCase()), 
-              id
+              id, date
             )
           );
         }
@@ -122,10 +122,12 @@ class Record {
   String participantId;
   String tourneyId;
   event title;
+  DateTime date;
+  int id;
 
-  Record.create(this.title, this.participantId, this.tourneyId, this.score);
+  Record.create(this.id, this.title, this.participantId, this.tourneyId, this.score, this.date);
 
-  Record(Map<String, dynamic> fbObject, this.title, this.tourneyId) {
+  Record(this.id, Map<String, dynamic> fbObject, this.title, this.tourneyId, this.date) {
     score = Score(fbObject["score"]);
     participantId = fbObject["participantId"];
   }

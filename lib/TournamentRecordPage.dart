@@ -1,37 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:expansion_card/expansion_card.dart';
+import 'package:intl/intl.dart';
 import 'package:project_4n6/Objects.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:charts_flutter/src/text_style.dart' as style;
-import 'package:charts_flutter/src/text_element.dart' as TextElement;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'StudentRecordPage.dart';
 import 'dart:math';
-
-class CustomCircleSymbolRenderer extends charts.CircleSymbolRenderer {
-
-  static String value;
-
-  @override
-  void paint(charts.ChartCanvas canvas, Rectangle<num> bounds, {List<int> dashPattern, charts.Color fillColor, charts.FillPatternType fillPattern, charts.Color strokeColor, double strokeWidthPx}) {
-    super.paint(canvas, bounds, dashPattern: dashPattern, fillColor: fillColor, fillPattern: fillPattern, strokeColor: strokeColor, strokeWidthPx: strokeWidthPx);
-    canvas.drawRect(
-      Rectangle(bounds.left - 5, bounds.top - 30, bounds.width + 10, bounds.height + 10),
-      fill: charts.Color.white
-    );
-    var textStyle = style.TextStyle();
-    textStyle.color = charts.Color.black;
-    textStyle.fontSize = 15;
-    canvas.drawText(
-      TextElement.TextElement(value, style: textStyle,),
-        (bounds.left).round() - 8,
-        (bounds.top - 28).round()
-    );
-  }
-
-}
 
 class ColoredTabBar extends Container implements PreferredSizeWidget {
   ColoredTabBar(this.color, this.tabBar);
@@ -67,12 +43,44 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
   List<Card> eventList = [];
   Map<event, Map<String, Record>> eventRecords = {};
 
-  _TournamentRecordPage(this.tourney);
+  TextEditingController dateController = TextEditingController();
+
+  _TournamentRecordPage(this.tourney) {
+     dateController.text = DateFormat('MM-dd-yyyy').format(tourney.date);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadEvents();
+  }
+
+  void updateName(String updated) {
+    
+    FirebaseFirestore.instance.collection("tourneys")
+    .doc(tourney.id).update({'title': updated});
+
+  }
+  
+  Future<void> selectDate() async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: tourney.date,
+      firstDate: DateTime.now().subtract(Duration(days: 90)),
+      lastDate: DateTime.now().add(Duration(days: 90)),
+      currentDate: tourney.date
+    );
+    if (picked != null && picked != tourney.date)
+    {
+      updateDate(picked);
+      tourney.date = picked;
+      dateController.text = DateFormat('MM-dd-yyyy').format(picked);
+    }
+  }
+
+  void updateDate(DateTime updated) {
+    FirebaseFirestore.instance.collection("tourneys")
+    .doc(tourney.id).update({'date': Timestamp.fromDate(updated)});
   }
 
   Widget getRecordsTab() {
@@ -97,6 +105,7 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
                               labelText: "Title"
                             ),
                             style: Theme.of(context).textTheme.headline6,
+                            onChanged: (value) => value.length > 0 ? updateName(value) : updateName(tourney.title),
                           ),
                         ),
                       ),
@@ -104,11 +113,13 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
-                            initialValue: tourney.getPrettyDate(),
+                            keyboardType: TextInputType.datetime,
+                            controller: dateController,
                             decoration: InputDecoration(
                               labelText: "Date"
                             ),
                             style: Theme.of(context).textTheme.headline6,
+                            onTap: () => selectDate(),
                           ),
                         ),
                       ),
@@ -150,14 +161,12 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Text(
-            "Event Charts",
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              fontFamily: Theme.of(context).textTheme.headline6.fontFamily,
-              fontSize: Theme.of(context).textTheme.headline6.fontSize,
-              color: Colors.black
-            )
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Events Graph",
+              style: Theme.of(context).textTheme.headline5,
+            ),
           ),
           getEventsChart(),
         ],
@@ -216,16 +225,25 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
 
   Widget getEventsChart() {
 
-    Map<String, List> studentDataList = {};
+    Map<String, List<BarChartGroupData>> eventList = {};
+    Map<String, List<String>> nameList = {};
     for (var i = 0; i < eventRecords.length; i++) {
       var eventKey = eventRecords.keys.elementAt(i);
-      studentDataList[eventKey.toString().split('.').last] = [];
+      eventList[eventKey.toString().split('.').last] = [];
+      nameList[eventKey.toString().split('.').last] = [];
       for (var j = 0; j < eventRecords[eventKey].length; j++) {
         String studentId = eventRecords[eventKey].keys.elementAt(j); 
         Student currentStudent = Student.load(studentId);
         setState(() {
           currentStudent.onReady( () {
-            studentDataList[eventKey.toString().split('.').last].add({'name': currentStudent.name, 'score': eventRecords[eventKey][studentId].score.overallScore});
+            eventList[eventKey.toString().split('.').last].add(
+              BarChartGroupData(
+                x: j,
+                
+                barRods: [BarChartRodData(width: 15, y: eventRecords[eventKey][studentId].score.overallScore)]
+              )
+            );
+            nameList[eventKey.toString().split('.').last].add(currentStudent.name);
           });
         });
       }
@@ -239,52 +257,36 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
           aspectRatio: 1,
           autoPlay: true,
           enlargeCenterPage: true,
-          viewportFraction: .8,
-          autoPlayInterval: Duration(seconds: 6)
+          viewportFraction: .75,
+          autoPlayInterval: Duration(seconds: 10)
         ),
-        items: List.generate(eventRecords.length, (eventIndex) {
+        items: List.generate(eventList.length, (eventIndex) {
           return Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 18.0, bottom: 50, right: 25),
             child: Container(
-              // height: 500,
-              child: new charts.BarChart(
-                [
-                  new charts.Series(
-                    id: eventRecords.keys.elementAt(eventIndex).toString().split('.').last,
-                    
-                    // displayName: eventRecords.keys.elementAt(eventIndex).toString().split('.').last,
-                    // labelAccessorFn: (record, index) => record[index].name,
-                    domainFn: (record, _) =>  record["name"],
-                    measureFn: (record, _) => record["score"],
-                    data: studentDataList[eventRecords.keys.elementAt(eventIndex).toString().split('.').last],
-                  )
-                ],
-                
-                domainAxis: charts.OrdinalAxisSpec(
-                  renderSpec: charts.SmallTickRendererSpec(labelRotation: 60),
-                ),
-                behaviors: [
-                  new charts.ChartTitle(eventRecords.keys.elementAt(eventIndex).toString().split('.').last,
-                    behaviorPosition: charts.BehaviorPosition.bottom,
-                    titleStyleSpec: charts.TextStyleSpec(fontSize: 11,),
-                    titleOutsideJustification:
-                      charts.OutsideJustification.middleDrawArea
+              // height: 700,
+              child: BarChart(
+                BarChartData(
+                  titlesData: FlTitlesData(
+                    bottomTitles: SideTitles(
+                      rotateAngle: 75,
+                      showTitles: true,
+                      getTextStyles: (value) => TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                      getTitles: (value) {
+                        var name = nameList[eventList.keys.elementAt(eventIndex)].elementAt(value.toInt()).split(' ');
+                        return name.length > 1 ? name.first + "..." : name.first;
+                      }
+                    )
                   ),
-                  new charts.SlidingViewport(),
-                  new charts.PanAndZoomBehavior(),
-                  charts.LinePointHighlighter(
-                    symbolRenderer: CustomCircleSymbolRenderer()
-                  )
-                ],
-                selectionModels: [
-                  charts.SelectionModelConfig(
-                    changedListener: (charts.SelectionModel model) {
-                      CustomCircleSymbolRenderer.value = model.selectedSeries[0].measureFn(model.selectedDatum[0].index).toString();
-                    }
-                  )
-                ],
-                animate: false,
-                barGroupingType: charts.BarGroupingType.groupedStacked,
+                  axisTitleData: FlAxisTitleData(
+                    topTitle: AxisTitle(showTitle: true, titleText: eventList.keys.elementAt(eventIndex),
+                      textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)
+                    ),
+                  ),
+                  alignment: BarChartAlignment.center,
+                  maxY: 7,
+                  barGroups: eventList[eventList.keys.elementAt(eventIndex)]
+                ),
               ),
             ),
           );
@@ -601,15 +603,20 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
 
       updatedTourney[eventTitle.toLowerCase()].add({'score': scores, 'participantId': toAdd.id.toString()});
 
-      await tourneyCollection.doc(tourneyId)
+      await studentCollection.doc(toAdd.id)
       .get().then((fbObject2) async {
       
-        var updatedStudent = fbObject2.data()['tourneyIds'] != null ? fbObject2.data()['tourneyIds'] : [];
+        
+        var updatedStudent = (fbObject2.data()['tourneyIds'] != null) ? fbObject2.data()['tourneyIds'] : [];
+        print(updatedStudent);
+        print(fbObject2.data()['tourneyIds'] != null);
+        print(fbObject2.data()['tourneyIds']);
 
         int currentTourneyIndex = updatedStudent.indexOf(tourneyId);
         if(currentTourneyIndex == -1)
         {
           updatedStudent.add(tourneyId);
+          print(updatedStudent);
           await studentCollection.doc(toAdd.id).update({'tourneyIds': updatedStudent});
         }
         await tourneyCollection.doc(tourneyId).update({'events': updatedTourney});
@@ -681,38 +688,6 @@ class _TournamentRecordPage extends State<TournamentRecordPage> {
         ),
       ),
     );
-
-    // return Scaffold(
-    //   body: DefaultTabController(
-    //     length: 2,
-    //     child: Column(
-    //       children: <Widget>[
-    //         Container(
-    //           height: 75,
-    //           color: Colors.grey.shade300,
-    //           child: TabBarView(
-    //             physics: NeverScrollableScrollPhysics(),
-    //             children: [
-    //               Icon(Icons.list),
-    //               Icon(Icons.score),
-    //             ],
-    //           ),
-    //         ),
-    //         Expanded(
-    //           child: TabBar(
-    //             unselectedLabelColor: Colors.blue,
-    //             labelColor: Colors.blue,
-    //             indicatorColor: Colors.white,
-    //             labelPadding: const EdgeInsets.all(0.0),
-    //             tabs: [
-    //               getRecordsTab(), Text("Hello") 
-    //             ],
-    //           ),
-    //         ),
-    //       ],
-    //     )
-    //   ),
-    // );
 
   }
 

@@ -51,7 +51,7 @@ class _AppPageState extends State<AppPage> {
         padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
-            child: Text('Sumner Forensics Season Tracker'),
+            child: Text('Sumner Forensics Season Record Tracker'),
             decoration: BoxDecoration(
               color: Colors.blue,
             ),

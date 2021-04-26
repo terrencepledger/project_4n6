@@ -55,7 +55,7 @@ class _StudentPageState extends State<StudentPage> {
                 child: Card(
                   elevation: 10,
                   child: ElevatedButton(
-                    onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => StudentRecordPage(students.elementAt(index))));},
+                    onLongPress: () {Navigator.push(context, MaterialPageRoute(builder: (context) => StudentRecordPage(students.elementAt(index)))).then((value) => loadStudents());},
                     onPressed: () { },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
